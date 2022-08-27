@@ -19,6 +19,11 @@ class PokemonEntity(models.Model):
     long = models.FloatField(verbose_name='Longitude')
     appeared_at = models.DateTimeField(verbose_name='Appeared at', null=True)
     disappeared_at = models.DateTimeField(verbose_name='Disappeared at', null=True)
+    level = models.IntegerField(default=0)
+    health = models.IntegerField(default=0)
+    strength = models.IntegerField(default=0)
+    defence = models.IntegerField(default=0)
+    stamina = models.IntegerField(default=0)
 
     def __str__(self):
         return f'{self.pokemon} on the map by ({self.lat}, {self.long})'
