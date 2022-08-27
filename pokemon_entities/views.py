@@ -5,6 +5,7 @@ import json
 
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
+from django.utils.timezone import localtime
 
 from .models import Pokemon
 
@@ -38,13 +39,17 @@ def show_all_pokemons(request):
     for pokemon in pokemons:
 
         for pokemon_entity in pokemon.entities.values():
-            print(pokemon_entity)
-            add_pokemon(
-                folium_map,
-                pokemon_entity['lat'],
-                pokemon_entity['long'],
-                os.path.join('media', str(pokemon.image)),
-            )
+            now_at = localtime().now().timetuple()
+            appeared_at = pokemon_entity['appeared_at'].timetuple()
+            disappeared_at = pokemon_entity['disappeared_at'].timetuple()
+
+            if appeared_at < now_at < disappeared_at:
+                add_pokemon(
+                    folium_map,
+                    pokemon_entity['lat'],
+                    pokemon_entity['long'],
+                    os.path.join('media', str(pokemon.image)),
+                )
 
     pokemons_on_page = []
     for pokemon in pokemons:
