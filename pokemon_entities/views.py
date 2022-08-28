@@ -31,32 +31,44 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
     ).add_to(folium_map)
 
 
+
+def get_pokemon_notes(request, pokemon_objects) -> dict:
+    pokemon_img_url = request.build_absolute_uri('/media/' + str(pokemon_objects.image))
+
+    pokemon = {
+        'pokemon_id': pokemon_objects.id,
+        'title_ru': pokemon_objects.title,
+        'title_en': pokemon_objects.title_en,
+        'title_jp': pokemon_objects.title_jp,
+        'description': pokemon_objects.description,
+        'img_url': pokemon_img_url,
+    }
+
+    return pokemon
+
 def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon in pokemons:
-        pokemon_img_url = request.build_absolute_uri('/media/' + str(pokemon.image))
         for pokemon_entity in pokemon.entities.values():
             now_at = localtime().now().timetuple()
             appeared_at = pokemon_entity['appeared_at'].timetuple()
             disappeared_at = pokemon_entity['disappeared_at'].timetuple()
 
             if appeared_at < now_at < disappeared_at:
+                pokemon_notes = get_pokemon_notes(request, pokemon)
                 add_pokemon(
                     folium_map,
                     pokemon_entity['lat'],
                     pokemon_entity['long'],
-                    pokemon_img_url,
+                    pokemon_notes['img_url'],
                 )
 
     pokemons_on_page = []
     for pokemon in pokemons:
-        pokemons_on_page.append({
-            'pokemon_id': pokemon.id,
-            'img_url': os.path.join('media', str(pokemon.image)),
-            'title_ru': pokemon.title,
-        })
+        pokemon_notes = get_pokemon_notes(request, pokemon)
+        pokemons_on_page.append(pokemon_notes)
 
     return render(request, 'mainpage.html', context={
         'map': folium_map._repr_html_(),
@@ -66,13 +78,13 @@ def show_all_pokemons(request):
 
 def show_pokemon(request, pokemon_id):
     try:
-        pokemon_objects = Pokemon.objects.get(id=pokemon_id)
-        pokemon_img_url = request.build_absolute_uri('/media/' + str(pokemon_objects.image))
+        pokemon = Pokemon.objects.get(id=pokemon_id)
+        pokemon_notes = get_pokemon_notes(request, pokemon)
     except Pokemon.DoesNotExist:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    for pokemon_entity in pokemon_objects.entities.values():
+    for pokemon_entity in pokemon.entities.values():
         now_at = localtime().now().timetuple()
         appeared_at = pokemon_entity['appeared_at'].timetuple()
         disappeared_at = pokemon_entity['disappeared_at'].timetuple()
@@ -82,17 +94,13 @@ def show_pokemon(request, pokemon_id):
                 folium_map,
                 pokemon_entity['lat'],
                 pokemon_entity['long'],
-                pokemon_img_url,
+                pokemon_notes['img_url'],
             )
+    if pokemon.evolution:
+        pokemon_notes['next_evolution'] = get_pokemon_notes(request, pokemon.evolution)
 
-    pokemon = {
-        'title_ru': pokemon_objects.title,
-        'title_en': pokemon_objects.title_en,
-        'title_jp': pokemon_objects.title_jp,
-        'description': pokemon_objects.description,
-        'img_url': pokemon_img_url,
-    }
+    print(pokemon_notes)
 
     return render(request, 'pokemon.html', context={
-        'map': folium_map._repr_html_(), 'pokemon': pokemon
+        'map': folium_map._repr_html_(), 'pokemon': pokemon_notes
     })
