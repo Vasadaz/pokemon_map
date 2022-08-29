@@ -9,7 +9,6 @@ from django.utils.timezone import localtime
 
 from .models import Pokemon
 
-
 MOSCOW_CENTER = [55.751244, 37.618423]
 DEFAULT_IMAGE_URL = (
     'https://vignette.wikia.nocookie.net/pokemon/images/6/6e/%21.png/revision'
@@ -31,7 +30,6 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
     ).add_to(folium_map)
 
 
-
 def get_pokemon_notes(request, pokemon_objects) -> dict:
     pokemon_img_url = request.build_absolute_uri('/media/' + str(pokemon_objects.image))
 
@@ -45,6 +43,7 @@ def get_pokemon_notes(request, pokemon_objects) -> dict:
     }
 
     return pokemon
+
 
 def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
