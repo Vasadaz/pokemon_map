@@ -7,10 +7,10 @@ class Pokemon(models.Model):
     title_jp = models.CharField(verbose_name='Имя яп.', max_length=200, blank=True)
     description = models.TextField(verbose_name='Описание', blank=True)
     image = models.ImageField(verbose_name='Изображение', upload_to='images', null=True)
-    evolution = models.ForeignKey(
+    next_evolution = models.ForeignKey(
         'Pokemon',
         verbose_name='Эволюция',
-        related_name='next_evolution',
+        related_name='previous_evolutions',
         blank=True,
         on_delete=models.SET_NULL,
         null=True,

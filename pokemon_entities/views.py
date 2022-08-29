@@ -1,9 +1,8 @@
-import os.path
-
 import folium
-import json
+
 
 from django.http import HttpResponseNotFound
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.utils.timezone import localtime
 
@@ -95,14 +94,14 @@ def show_pokemon(request, pokemon_id):
                 pokemon_entity['long'],
                 pokemon_notes['img_url'],
             )
-    if pokemon.evolution:
-        pokemon_notes['next_evolution'] = get_pokemon_notes(request, pokemon.evolution)
+    if pokemon.next_evolution:
+        pokemon_notes['next_evolution'] = get_pokemon_notes(request, pokemon.next_evolution)
 
     try:
-        parent_pokemon = Pokemon.objects.get(evolution=pokemon)
+        parent_pokemon = pokemon.previous_evolutions.get()
         pokemon_notes['previous_evolution'] = get_pokemon_notes(request, parent_pokemon)
     except Pokemon.DoesNotExist:
-        pass
+        pokemon_notes['previous_evolution'] = None
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(), 'pokemon': pokemon_notes
