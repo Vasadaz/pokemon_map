@@ -46,27 +46,27 @@ def get_pokemon_notes(request, pokemon_objects) -> dict:
 
 def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
-
-    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    for pokemon in pokemons:
-        for pokemon_entity in pokemon.entities.values():
-            now_at = localtime().now().timetuple()
-            appeared_at = pokemon_entity['appeared_at'].timetuple()
-            disappeared_at = pokemon_entity['disappeared_at'].timetuple()
-
-            if appeared_at < now_at < disappeared_at:
-                pokemon_notes = get_pokemon_notes(request, pokemon)
-                add_pokemon(
-                    folium_map,
-                    pokemon_entity['lat'],
-                    pokemon_entity['long'],
-                    pokemon_notes['img_url'],
-                )
-
     pokemons_on_page = []
+    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+
     for pokemon in pokemons:
         pokemon_notes = get_pokemon_notes(request, pokemon)
         pokemons_on_page.append(pokemon_notes)
+        now_at = localtime().now()
+
+        for pokemon_entity in pokemon.entities.filter(
+            appeared_at__date__lt=now_at,
+            disappeared_at__date__gt=now_at,
+        ).values(
+            'lat',
+            'long',
+        ):
+            add_pokemon(
+                folium_map,
+                pokemon_entity['lat'],
+                pokemon_entity['long'],
+                pokemon_notes['img_url'],
+            )
 
     return render(request, 'mainpage.html', context={
         'map': folium_map._repr_html_(),
