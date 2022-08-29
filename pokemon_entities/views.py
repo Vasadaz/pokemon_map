@@ -99,7 +99,11 @@ def show_pokemon(request, pokemon_id):
     if pokemon.evolution:
         pokemon_notes['next_evolution'] = get_pokemon_notes(request, pokemon.evolution)
 
-    print(pokemon_notes)
+    try:
+        parent_pokemon = Pokemon.objects.get(evolution=pokemon)
+        pokemon_notes['previous_evolution'] = get_pokemon_notes(request, parent_pokemon)
+    except Pokemon.DoesNotExist:
+        pass
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(), 'pokemon': pokemon_notes
