@@ -1,4 +1,4 @@
-from django.db import models  # noqa F401
+from django.db import models
 
 
 class Pokemon(models.Model):
@@ -33,13 +33,13 @@ class PokemonEntity(models.Model):
     )
     lat = models.FloatField(verbose_name='Широта')
     long = models.FloatField(verbose_name='Долгота')
-    appeared_at = models.DateTimeField(verbose_name='Добавлен в', null=True)
-    disappeared_at = models.DateTimeField(verbose_name='Исчезает в', null=True)
-    level = models.IntegerField(verbose_name='Уровень', default=0)
-    health = models.IntegerField(verbose_name='Здоровье', default=0)
-    strength = models.IntegerField(verbose_name='Сила', default=0)
-    defence = models.IntegerField(verbose_name='Защита', default=0)
-    stamina = models.IntegerField(verbose_name='Выносливость', default=0)
+    appeared_at = models.DateTimeField(verbose_name='Появляется в')
+    disappeared_at = models.DateTimeField(verbose_name='Исчезает в')
+    level = models.IntegerField(verbose_name='Уровень')
+    health = models.IntegerField(verbose_name='Здоровье', blank=True)
+    strength = models.IntegerField(verbose_name='Сила', blank=True)
+    defence = models.IntegerField(verbose_name='Защита', blank=True)
+    stamina = models.IntegerField(verbose_name='Выносливость', blank=True)
 
     class Meta:
         verbose_name = 'Местонахождение покемона'
@@ -47,3 +47,4 @@ class PokemonEntity(models.Model):
 
     def __str__(self):
         return f'{self.pokemon} on the map by ({self.lat}, {self.long})'
+1
