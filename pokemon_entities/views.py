@@ -79,16 +79,15 @@ def show_pokemon(request, pokemon_id):
         appeared_at__date__lt=now_at,
         disappeared_at__date__gt=now_at,
     ).values('lat', 'long')
-
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    for pokemon_entity in pokemon_entities.filter(pokemon=pokemon):
 
-            add_pokemon(
-                folium_map,
-                pokemon_entity['lat'],
-                pokemon_entity['long'],
-                pokemon_notes['img_url'],
-            )
+    for pokemon_entity in pokemon_entities.filter(pokemon=pokemon):
+        add_pokemon(
+            folium_map,
+            pokemon_entity['lat'],
+            pokemon_entity['long'],
+            pokemon_notes['img_url'],
+        )
     if pokemon.next_evolution:
         pokemon_notes['next_evolution'] = get_pokemon_notes(request, pokemon.next_evolution)
 
