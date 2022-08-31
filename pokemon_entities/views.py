@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.utils.timezone import localtime
 
-from .models import Pokemon
+from .models import Pokemon, PokemonEntity
 
 MOSCOW_CENTER = [55.751244, 37.618423]
 DEFAULT_IMAGE_URL = (
@@ -48,19 +48,17 @@ def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
     pokemons_on_page = []
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+    now_at = localtime().now()
+    pokemon_entities = PokemonEntity.objects.filter(
+        appeared_at__date__lt=now_at,
+        disappeared_at__date__gt=now_at,
+    ).values('lat', 'long')
 
     for pokemon in pokemons:
         pokemon_notes = get_pokemon_notes(request, pokemon)
         pokemons_on_page.append(pokemon_notes)
-        now_at = localtime().now()
 
-        for pokemon_entity in pokemon.entities.filter(
-            appeared_at__date__lt=now_at,
-            disappeared_at__date__gt=now_at,
-        ).values(
-            'lat',
-            'long',
-        ):
+        for pokemon_entity in pokemon_entities.filter(pokemon=pokemon):
             add_pokemon(
                 folium_map,
                 pokemon_entity['lat'],
